@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Salvador Netto">
+
+<title>House Prices</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="main_files/libs/clipboard/clipboard.min.js"></script>
+<script src="main_files/libs/quarto-html/quarto.js"></script>
+<script src="main_files/libs/quarto-html/popper.min.js"></script>
+<script src="main_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="main_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="main_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="main_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="main_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="main_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="main_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="main_files/libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Conteúdo</h2>
+   
+  <ul>
+  <li><a href="#importando-dataset" id="toc-importando-dataset" class="nav-link active" data-scroll-target="#importando-dataset"><span class="header-section-number">1</span> Importando dataset</a></li>
+  <li><a href="#análise-exploratória" id="toc-análise-exploratória" class="nav-link" data-scroll-target="#análise-exploratória"><span class="header-section-number">2</span> Análise exploratória</a></li>
+  <li><a href="#preparando-os-dados" id="toc-preparando-os-dados" class="nav-link" data-scroll-target="#preparando-os-dados"><span class="header-section-number">3</span> Preparando os dados</a>
+  <ul class="collapse">
+  <li><a href="#limpeza-dos-dados" id="toc-limpeza-dos-dados" class="nav-link" data-scroll-target="#limpeza-dos-dados"><span class="header-section-number">3.1</span> Limpeza dos dados</a></li>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering"><span class="header-section-number">3.2</span> Feature Engineering</a></li>
+  </ul></li>
+  <li><a href="#lista-de-modelos" id="toc-lista-de-modelos" class="nav-link" data-scroll-target="#lista-de-modelos"><span class="header-section-number">4</span> Lista de modelos</a></li>
+  <li><a href="#ajustando-hiperparâmetros" id="toc-ajustando-hiperparâmetros" class="nav-link" data-scroll-target="#ajustando-hiperparâmetros"><span class="header-section-number">5</span> Ajustando hiperparâmetros</a></li>
+  <li><a href="#avaliando-no-test-set" id="toc-avaliando-no-test-set" class="nav-link" data-scroll-target="#avaliando-no-test-set"><span class="header-section-number">6</span> Avaliando no test-set</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">House Prices</h1>
+<p class="subtitle lead">Prevendo preço da venda de casas</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autor</div>
+    <div class="quarto-title-meta-contents">
+             <p>Salvador Netto </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="abstract-title">Resumo</div>
+    Este projeto é parte de uma mentoria oferecida pelo setor de projetos da empresa júnior de estatística da UFMG ‘EstatMG’. Nesse programa, ex-membros veteranos nos auxiliam na construção de projetos de machine learning, simulando situações reais do mercado de trabalho.
+  </div>
+</div>
+
+</header>
+
+<p>O objetivo deste projeto é prever os preços que casas foram vendidas. O banco de dados é da competição presente no <a href="https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques">Kaggle</a>.</p>
+<p>Foi usado um modelo <em>Supervised, offline e Model-based</em>, com a métrica <em>RMSE (Root Mean Squared Error)</em></p>
+<div class="cell" data-execution_count="92">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Exploration</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Stats</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Data Preparation</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OrdinalEncoder</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> OneHotEncoder</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.compose <span class="im">import</span> ColumnTransformer</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Models</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeRegressor</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> RandomForestRegressor</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Metrics</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparameters</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> RandomizedSearchCV</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> randint</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Configs</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(action<span class="op">=</span><span class="st">"ignore"</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_seq_items <span class="op">=</span> <span class="dv">8000</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>pd.options.display.max_rows <span class="op">=</span> <span class="dv">8000</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>pd.set_option(<span class="st">'display.max_columns'</span>, <span class="va">None</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="importando-dataset" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Importando dataset</h1>
+<div class="cell" data-execution_count="93">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the dataset</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> pd.read_csv(<span class="st">'data/train.csv'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> pd.read_csv(<span class="st">'data/test.csv'</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>train.shape, test.shape</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="93">
+<pre><code>((1460, 81), (1459, 80))</code></pre>
+</div>
+</div>
+</section>
+<section id="análise-exploratória" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Análise exploratória</h1>
+<p>Nosso objetivo é prever a coluna <code>SalePrice</code></p>
+<div class="cell" data-execution_count="94">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>train.head()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="94">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Id</th>
+<th data-quarto-table-cell-role="th">MSSubClass</th>
+<th data-quarto-table-cell-role="th">MSZoning</th>
+<th data-quarto-table-cell-role="th">LotFrontage</th>
+<th data-quarto-table-cell-role="th">LotArea</th>
+<th data-quarto-table-cell-role="th">Street</th>
+<th data-quarto-table-cell-role="th">Alley</th>
+<th data-quarto-table-cell-role="th">LotShape</th>
+<th data-quarto-table-cell-role="th">LandContour</th>
+<th data-quarto-table-cell-role="th">Utilities</th>
+<th data-quarto-table-cell-role="th">LotConfig</th>
+<th data-quarto-table-cell-role="th">LandSlope</th>
+<th data-quarto-table-cell-role="th">Neighborhood</th>
+<th data-quarto-table-cell-role="th">Condition1</th>
+<th data-quarto-table-cell-role="th">Condition2</th>
+<th data-quarto-table-cell-role="th">BldgType</th>
+<th data-quarto-table-cell-role="th">HouseStyle</th>
+<th data-quarto-table-cell-role="th">OverallQual</th>
+<th data-quarto-table-cell-role="th">OverallCond</th>
+<th data-quarto-table-cell-role="th">YearBuilt</th>
+<th data-quarto-table-cell-role="th">YearRemodAdd</th>
+<th data-quarto-table-cell-role="th">RoofStyle</th>
+<th data-quarto-table-cell-role="th">RoofMatl</th>
+<th data-quarto-table-cell-role="th">Exterior1st</th>
+<th data-quarto-table-cell-role="th">Exterior2nd</th>
+<th data-quarto-table-cell-role="th">MasVnrType</th>
+<th data-quarto-table-cell-role="th">MasVnrArea</th>
+<th data-quarto-table-cell-role="th">ExterQual</th>
+<th data-quarto-table-cell-role="th">ExterCond</th>
+<th data-quarto-table-cell-role="th">Foundation</th>
+<th data-quarto-table-cell-role="th">BsmtQual</th>
+<th data-quarto-table-cell-role="th">BsmtCond</th>
+<th data-quarto-table-cell-role="th">BsmtExposure</th>
+<th data-quarto-table-cell-role="th">BsmtFinType1</th>
+<th data-quarto-table-cell-role="th">BsmtFinSF1</th>
+<th data-quarto-table-cell-role="th">BsmtFinType2</th>
+<th data-quarto-table-cell-role="th">BsmtFinSF2</th>
+<th data-quarto-table-cell-role="th">BsmtUnfSF</th>
+<th data-quarto-table-cell-role="th">TotalBsmtSF</th>
+<th data-quarto-table-cell-role="th">Heating</th>
+<th data-quarto-table-cell-role="th">HeatingQC</th>
+<th data-quarto-table-cell-role="th">CentralAir</th>
+<th data-quarto-table-cell-role="th">Electrical</th>
+<th data-quarto-table-cell-role="th">1stFlrSF</th>
+<th data-quarto-table-cell-role="th">2ndFlrSF</th>
+<th data-quarto-table-cell-role="th">LowQualFinSF</th>
+<th data-quarto-table-cell-role="th">GrLivArea</th>
+<th data-quarto-table-cell-role="th">BsmtFullBath</th>
+<th data-quarto-table-cell-role="th">BsmtHalfBath</th>
+<th data-quarto-table-cell-role="th">FullBath</th>
+<th data-quarto-table-cell-role="th">HalfBath</th>
+<th data-quarto-table-cell-role="th">BedroomAbvGr</th>
+<th data-quarto-table-cell-role="th">KitchenAbvGr</th>
+<th data-quarto-table-cell-role="th">KitchenQual</th>
+<th data-quarto-table-cell-role="th">TotRmsAbvGrd</th>
+<th data-quarto-table-cell-role="th">Functional</th>
+<th data-quarto-table-cell-role="th">Fireplaces</th>
+<th data-quarto-table-cell-role="th">FireplaceQu</th>
+<th data-quarto-table-cell-role="th">GarageType</th>
+<th data-quarto-table-cell-role="th">GarageYrBlt</th>
+<th data-quarto-table-cell-role="th">GarageFinish</th>
+<th data-quarto-table-cell-role="th">GarageCars</th>
+<th data-quarto-table-cell-role="th">GarageArea</th>
+<th data-quarto-table-cell-role="th">GarageQual</th>
+<th data-quarto-table-cell-role="th">GarageCond</th>
+<th data-quarto-table-cell-role="th">PavedDrive</th>
+<th data-quarto-table-cell-role="th">WoodDeckSF</th>
+<th data-quarto-table-cell-role="th">OpenPorchSF</th>
+<th data-quarto-table-cell-role="th">EnclosedPorch</th>
+<th data-quarto-table-cell-role="th">3SsnPorch</th>
+<th data-quarto-table-cell-role="th">ScreenPorch</th>
+<th data-quarto-table-cell-role="th">PoolArea</th>
+<th data-quarto-table-cell-role="th">PoolQC</th>
+<th data-quarto-table-cell-role="th">Fence</th>
+<th data-quarto-table-cell-role="th">MiscFeature</th>
+<th data-quarto-table-cell-role="th">MiscVal</th>
+<th data-quarto-table-cell-role="th">MoSold</th>
+<th data-quarto-table-cell-role="th">YrSold</th>
+<th data-quarto-table-cell-role="th">SaleType</th>
+<th data-quarto-table-cell-role="th">SaleCondition</th>
+<th data-quarto-table-cell-role="th">SalePrice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>60</td>
+<td>RL</td>
+<td>65.0</td>
+<td>8450</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>Inside</td>
+<td>Gtl</td>
+<td>CollgCr</td>
+<td>Norm</td>
+<td>Norm</td>
+<td>1Fam</td>
+<td>2Story</td>
+<td>7</td>
+<td>5</td>
+<td>2003</td>
+<td>2003</td>
+<td>Gable</td>
+<td>CompShg</td>
+<td>VinylSd</td>
+<td>VinylSd</td>
+<td>BrkFace</td>
+<td>196.0</td>
+<td>Gd</td>
+<td>TA</td>
+<td>PConc</td>
+<td>Gd</td>
+<td>TA</td>
+<td>No</td>
+<td>GLQ</td>
+<td>706</td>
+<td>Unf</td>
+<td>0</td>
+<td>150</td>
+<td>856</td>
+<td>GasA</td>
+<td>Ex</td>
+<td>Y</td>
+<td>SBrkr</td>
+<td>856</td>
+<td>854</td>
+<td>0</td>
+<td>1710</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>Gd</td>
+<td>8</td>
+<td>Typ</td>
+<td>0</td>
+<td>NaN</td>
+<td>Attchd</td>
+<td>2003.0</td>
+<td>RFn</td>
+<td>2</td>
+<td>548</td>
+<td>TA</td>
+<td>TA</td>
+<td>Y</td>
+<td>0</td>
+<td>61</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>208500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>20</td>
+<td>RL</td>
+<td>80.0</td>
+<td>9600</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>Reg</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>FR2</td>
+<td>Gtl</td>
+<td>Veenker</td>
+<td>Feedr</td>
+<td>Norm</td>
+<td>1Fam</td>
+<td>1Story</td>
+<td>6</td>
+<td>8</td>
+<td>1976</td>
+<td>1976</td>
+<td>Gable</td>
+<td>CompShg</td>
+<td>MetalSd</td>
+<td>MetalSd</td>
+<td>None</td>
+<td>0.0</td>
+<td>TA</td>
+<td>TA</td>
+<td>CBlock</td>
+<td>Gd</td>
+<td>TA</td>
+<td>Gd</td>
+<td>ALQ</td>
+<td>978</td>
+<td>Unf</td>
+<td>0</td>
+<td>284</td>
+<td>1262</td>
+<td>GasA</td>
+<td>Ex</td>
+<td>Y</td>
+<td>SBrkr</td>
+<td>1262</td>
+<td>0</td>
+<td>0</td>
+<td>1262</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>0</td>
+<td>3</td>
+<td>1</td>
+<td>TA</td>
+<td>6</td>
+<td>Typ</td>
+<td>1</td>
+<td>TA</td>
+<td>Attchd</td>
+<td>1976.0</td>
+<td>RFn</td>
+<td>2</td>
+<td>460</td>
+<td>TA</td>
+<td>TA</td>
+<td>Y</td>
+<td>298</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>5</td>
+<td>2007</td>
+<td>WD</td>
+<td>Normal</td>
+<td>181500</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>60</td>
+<td>RL</td>
+<td>68.0</td>
+<td>11250</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>Inside</td>
+<td>Gtl</td>
+<td>CollgCr</td>
+<td>Norm</td>
+<td>Norm</td>
+<td>1Fam</td>
+<td>2Story</td>
+<td>7</td>
+<td>5</td>
+<td>2001</td>
+<td>2002</td>
+<td>Gable</td>
+<td>CompShg</td>
+<td>VinylSd</td>
+<td>VinylSd</td>
+<td>BrkFace</td>
+<td>162.0</td>
+<td>Gd</td>
+<td>TA</td>
+<td>PConc</td>
+<td>Gd</td>
+<td>TA</td>
+<td>Mn</td>
+<td>GLQ</td>
+<td>486</td>
+<td>Unf</td>
+<td>0</td>
+<td>434</td>
+<td>920</td>
+<td>GasA</td>
+<td>Ex</td>
+<td>Y</td>
+<td>SBrkr</td>
+<td>920</td>
+<td>866</td>
+<td>0</td>
+<td>1786</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>Gd</td>
+<td>6</td>
+<td>Typ</td>
+<td>1</td>
+<td>TA</td>
+<td>Attchd</td>
+<td>2001.0</td>
+<td>RFn</td>
+<td>2</td>
+<td>608</td>
+<td>TA</td>
+<td>TA</td>
+<td>Y</td>
+<td>0</td>
+<td>42</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>9</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>223500</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>70</td>
+<td>RL</td>
+<td>60.0</td>
+<td>9550</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>Corner</td>
+<td>Gtl</td>
+<td>Crawfor</td>
+<td>Norm</td>
+<td>Norm</td>
+<td>1Fam</td>
+<td>2Story</td>
+<td>7</td>
+<td>5</td>
+<td>1915</td>
+<td>1970</td>
+<td>Gable</td>
+<td>CompShg</td>
+<td>Wd Sdng</td>
+<td>Wd Shng</td>
+<td>None</td>
+<td>0.0</td>
+<td>TA</td>
+<td>TA</td>
+<td>BrkTil</td>
+<td>TA</td>
+<td>Gd</td>
+<td>No</td>
+<td>ALQ</td>
+<td>216</td>
+<td>Unf</td>
+<td>0</td>
+<td>540</td>
+<td>756</td>
+<td>GasA</td>
+<td>Gd</td>
+<td>Y</td>
+<td>SBrkr</td>
+<td>961</td>
+<td>756</td>
+<td>0</td>
+<td>1717</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>1</td>
+<td>Gd</td>
+<td>7</td>
+<td>Typ</td>
+<td>1</td>
+<td>Gd</td>
+<td>Detchd</td>
+<td>1998.0</td>
+<td>Unf</td>
+<td>3</td>
+<td>642</td>
+<td>TA</td>
+<td>TA</td>
+<td>Y</td>
+<td>0</td>
+<td>35</td>
+<td>272</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>2</td>
+<td>2006</td>
+<td>WD</td>
+<td>Abnorml</td>
+<td>140000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>60</td>
+<td>RL</td>
+<td>84.0</td>
+<td>14260</td>
+<td>Pave</td>
+<td>NaN</td>
+<td>IR1</td>
+<td>Lvl</td>
+<td>AllPub</td>
+<td>FR2</td>
+<td>Gtl</td>
+<td>NoRidge</td>
+<td>Norm</td>
+<td>Norm</td>
+<td>1Fam</td>
+<td>2Story</td>
+<td>8</td>
+<td>5</td>
+<td>2000</td>
+<td>2000</td>
+<td>Gable</td>
+<td>CompShg</td>
+<td>VinylSd</td>
+<td>VinylSd</td>
+<td>BrkFace</td>
+<td>350.0</td>
+<td>Gd</td>
+<td>TA</td>
+<td>PConc</td>
+<td>Gd</td>
+<td>TA</td>
+<td>Av</td>
+<td>GLQ</td>
+<td>655</td>
+<td>Unf</td>
+<td>0</td>
+<td>490</td>
+<td>1145</td>
+<td>GasA</td>
+<td>Ex</td>
+<td>Y</td>
+<td>SBrkr</td>
+<td>1145</td>
+<td>1053</td>
+<td>0</td>
+<td>2198</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>Gd</td>
+<td>9</td>
+<td>Typ</td>
+<td>1</td>
+<td>TA</td>
+<td>Attchd</td>
+<td>2000.0</td>
+<td>RFn</td>
+<td>3</td>
+<td>836</td>
+<td>TA</td>
+<td>TA</td>
+<td>Y</td>
+<td>192</td>
+<td>84</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>0</td>
+<td>12</td>
+<td>2008</td>
+<td>WD</td>
+<td>Normal</td>
+<td>250000</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="95">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>train.info()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 1460 entries, 0 to 1459
+Data columns (total 81 columns):
+ #   Column         Non-Null Count  Dtype  
+---  ------         --------------  -----  
+ 0   Id             1460 non-null   int64  
+ 1   MSSubClass     1460 non-null   int64  
+ 2   MSZoning       1460 non-null   object 
+ 3   LotFrontage    1201 non-null   float64
+ 4   LotArea        1460 non-null   int64  
+ 5   Street         1460 non-null   object 
+ 6   Alley          91 non-null     object 
+ 7   LotShape       1460 non-null   object 
+ 8   LandContour    1460 non-null   object 
+ 9   Utilities      1460 non-null   object 
+ 10  LotConfig      1460 non-null   object 
+ 11  LandSlope      1460 non-null   object 
+ 12  Neighborhood   1460 non-null   object 
+ 13  Condition1     1460 non-null   object 
+ 14  Condition2     1460 non-null   object 
+ 15  BldgType       1460 non-null   object 
+ 16  HouseStyle     1460 non-null   object 
+ 17  OverallQual    1460 non-null   int64  
+ 18  OverallCond    1460 non-null   int64  
+ 19  YearBuilt      1460 non-null   int64  
+ 20  YearRemodAdd   1460 non-null   int64  
+ 21  RoofStyle      1460 non-null   object 
+ 22  RoofMatl       1460 non-null   object 
+ 23  Exterior1st    1460 non-null   object 
+ 24  Exterior2nd    1460 non-null   object 
+ 25  MasVnrType     1452 non-null   object 
+ 26  MasVnrArea     1452 non-null   float64
+ 27  ExterQual      1460 non-null   object 
+ 28  ExterCond      1460 non-null   object 
+ 29  Foundation     1460 non-null   object 
+ 30  BsmtQual       1423 non-null   object 
+ 31  BsmtCond       1423 non-null   object 
+ 32  BsmtExposure   1422 non-null   object 
+ 33  BsmtFinType1   1423 non-null   object 
+ 34  BsmtFinSF1     1460 non-null   int64  
+ 35  BsmtFinType2   1422 non-null   object 
+ 36  BsmtFinSF2     1460 non-null   int64  
+ 37  BsmtUnfSF      1460 non-null   int64  
+ 38  TotalBsmtSF    1460 non-null   int64  
+ 39  Heating        1460 non-null   object 
+ 40  HeatingQC      1460 non-null   object 
+ 41  CentralAir     1460 non-null   object 
+ 42  Electrical     1459 non-null   object 
+ 43  1stFlrSF       1460 non-null   int64  
+ 44  2ndFlrSF       1460 non-null   int64  
+ 45  LowQualFinSF   1460 non-null   int64  
+ 46  GrLivArea      1460 non-null   int64  
+ 47  BsmtFullBath   1460 non-null   int64  
+ 48  BsmtHalfBath   1460 non-null   int64  
+ 49  FullBath       1460 non-null   int64  
+ 50  HalfBath       1460 non-null   int64  
+ 51  BedroomAbvGr   1460 non-null   int64  
+ 52  KitchenAbvGr   1460 non-null   int64  
+ 53  KitchenQual    1460 non-null   object 
+ 54  TotRmsAbvGrd   1460 non-null   int64  
+ 55  Functional     1460 non-null   object 
+ 56  Fireplaces     1460 non-null   int64  
+ 57  FireplaceQu    770 non-null    object 
+ 58  GarageType     1379 non-null   object 
+ 59  GarageYrBlt    1379 non-null   float64
+ 60  GarageFinish   1379 non-null   object 
+ 61  GarageCars     1460 non-null   int64  
+ 62  GarageArea     1460 non-null   int64  
+ 63  GarageQual     1379 non-null   object 
+ 64  GarageCond     1379 non-null   object 
+ 65  PavedDrive     1460 non-null   object 
+ 66  WoodDeckSF     1460 non-null   int64  
+ 67  OpenPorchSF    1460 non-null   int64  
+ 68  EnclosedPorch  1460 non-null   int64  
+ 69  3SsnPorch      1460 non-null   int64  
+ 70  ScreenPorch    1460 non-null   int64  
+ 71  PoolArea       1460 non-null   int64  
+ 72  PoolQC         7 non-null      object 
+ 73  Fence          281 non-null    object 
+ 74  MiscFeature    54 non-null     object 
+ 75  MiscVal        1460 non-null   int64  
+ 76  MoSold         1460 non-null   int64  
+ 77  YrSold         1460 non-null   int64  
+ 78  SaleType       1460 non-null   object 
+ 79  SaleCondition  1460 non-null   object 
+ 80  SalePrice      1460 non-null   int64  
+dtypes: float64(3), int64(35), object(43)
+memory usage: 924.0+ KB</code></pre>
+</div>
+</div>
+<p>Analisando nosso <em>label</em> <code>SalePrice</code></p>
+<div class="cell" data-execution_count="96">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>sns.distplot(train[<span class="st">'SalePrice'</span>])</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="97">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Curtose: </span><span class="sc">%f</span><span class="st">'</span> <span class="op">%</span> train.SalePrice.kurt())</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Assimetria: </span><span class="sc">%f</span><span class="st">'</span> <span class="op">%</span>train.SalePrice.skew())</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Curtose: 6.536282
+Assimetria: 1.882876</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="98">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Coletando features numericas</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>numeric_features <span class="op">=</span> train.select_dtypes(include<span class="op">=</span><span class="st">'number'</span>).columns.tolist()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="99">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Distribuições das features</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">120</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, feature <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">list</span>(train[numeric_features]), <span class="dv">1</span>):</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    plt.subplot(<span class="bu">len</span>(numeric_features), <span class="dv">4</span>, i)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    sns.histplot(data<span class="op">=</span>train, x<span class="op">=</span>feature, kde<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualizando alguns outliers</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">120</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, feature <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">list</span>(train[numeric_features]), <span class="dv">1</span>):</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    plt.subplot(<span class="bu">len</span>(numeric_features), <span class="dv">3</span>, i)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    sns.scatterplot(data<span class="op">=</span>train, x<span class="op">=</span>feature,y<span class="op">=</span> <span class="st">'SalePrice'</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-10-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="101">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlações</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>corr <span class="op">=</span> train.corr()</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>plt.subplots(figsize<span class="op">=</span> (<span class="dv">17</span>,<span class="dv">12</span>))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>sns.heatmap(corr, square<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span> <span class="st">'Blues'</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="102">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Detectando valores faltantes</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> missing_values(df):</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> df.isnull().<span class="bu">sum</span>()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    percent <span class="op">=</span> <span class="bu">round</span>(df.isnull().<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(df)<span class="op">*</span><span class="dv">100</span>, <span class="dv">2</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    concat <span class="op">=</span> pd.concat([total, percent], axis<span class="op">=</span> <span class="dv">1</span>, keys<span class="op">=</span>[<span class="st">'Total'</span>, <span class="st">'%'</span>])</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> concat.loc[concat[<span class="st">'Total'</span>] <span class="op">!=</span> <span class="dv">0</span>].sort_values(by<span class="op">=</span> [<span class="st">'Total'</span>], ascending<span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>missing_values(train)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="102">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Total</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">PoolQC</td>
+<td>1453</td>
+<td>99.52</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">MiscFeature</td>
+<td>1406</td>
+<td>96.30</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Alley</td>
+<td>1369</td>
+<td>93.77</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Fence</td>
+<td>1179</td>
+<td>80.75</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">FireplaceQu</td>
+<td>690</td>
+<td>47.26</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">LotFrontage</td>
+<td>259</td>
+<td>17.74</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageType</td>
+<td>81</td>
+<td>5.55</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">GarageYrBlt</td>
+<td>81</td>
+<td>5.55</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageFinish</td>
+<td>81</td>
+<td>5.55</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">GarageQual</td>
+<td>81</td>
+<td>5.55</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageCond</td>
+<td>81</td>
+<td>5.55</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtExposure</td>
+<td>38</td>
+<td>2.60</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtFinType2</td>
+<td>38</td>
+<td>2.60</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtFinType1</td>
+<td>37</td>
+<td>2.53</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtCond</td>
+<td>37</td>
+<td>2.53</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtQual</td>
+<td>37</td>
+<td>2.53</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">MasVnrArea</td>
+<td>8</td>
+<td>0.55</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">MasVnrType</td>
+<td>8</td>
+<td>0.55</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Electrical</td>
+<td>1</td>
+<td>0.07</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="preparando-os-dados" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Preparando os dados</h1>
+<p>O label não possui uma distribuição normal, então aplico uma transformação usando logaritmo natural</p>
+<div class="cell" data-execution_count="103">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>sns.distplot(train[<span class="st">'SalePrice'</span>])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="104">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># log transform</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>train[<span class="st">'SalePrice'</span>] <span class="op">=</span> np.log(train.SalePrice)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="105">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">7</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>sns.distplot(train[<span class="st">'SalePrice'</span>], fit<span class="op">=</span> norm)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>mu, sigma <span class="op">=</span> norm.fit(train[<span class="st">'SalePrice'</span>])</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>plt.legend([<span class="st">'SalePrice dist.'</span>,<span class="st">'Normal dist. ($\mu=$ </span><span class="sc">{:.2f}</span><span class="st"> and $\sigma=$ </span><span class="sc">{:.2f}</span><span class="st"> )'</span>.<span class="bu">format</span>(mu, sigma)], loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<section id="limpeza-dos-dados" class="level2" data-number="3.1">
+<h2 data-number="3.1" data-anchor-id="limpeza-dos-dados"><span class="header-section-number">3.1</span> Limpeza dos dados</h2>
+<div class="cell" data-execution_count="106">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Removendo outliers</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>train.drop(train[train[<span class="st">'LotFrontage'</span>] <span class="op">&gt;</span> <span class="dv">250</span>].index, inplace<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>train.drop(train[train[<span class="st">'GrLivArea'</span>] <span class="op">&gt;</span> <span class="dv">4500</span>].index, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>train.drop(train[(train[<span class="st">'OverallQual'</span>]<span class="op">&lt;</span><span class="dv">5</span>) <span class="op">&amp;</span> (train[<span class="st">'SalePrice'</span>]<span class="op">&gt;</span><span class="dv">200000</span>)].index, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>train.drop(train[(train[<span class="st">'OverallCond'</span>]<span class="op">&lt;</span><span class="dv">5</span>) <span class="op">&amp;</span> (train[<span class="st">'SalePrice'</span>]<span class="op">&gt;</span><span class="dv">300000</span>)].index, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>train.drop(train[train[<span class="st">'BsmtFinSF1'</span>] <span class="op">&gt;</span> <span class="dv">4000</span>].index, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>train.drop(train[train[<span class="st">'TotalBsmtSF'</span>] <span class="op">&gt;</span> <span class="dv">5000</span>].index, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>train.drop(train[train[<span class="st">'1stFlrSF'</span>] <span class="op">&gt;</span> <span class="dv">4000</span>].index, inplace<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>train.reset_index(drop<span class="op">=</span><span class="va">True</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>train.shape</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="106">
+<pre><code>(1457, 81)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="107">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>removed_outliers <span class="op">=</span> [<span class="st">'LotFrontage'</span>,<span class="st">'GrLivArea'</span>,<span class="st">'OverallQual'</span>,<span class="st">'OverallCond'</span>,<span class="st">'BsmtFinSF1'</span>,<span class="st">'TotalBsmtSF'</span>, <span class="st">'1stFlrSF'</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualizando alguns outliers</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">20</span>))</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, feature <span class="kw">in</span> <span class="bu">enumerate</span>(<span class="bu">list</span>(train[removed_outliers]), <span class="dv">1</span>):</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    plt.subplot(<span class="bu">len</span>(removed_outliers), <span class="dv">3</span>, i)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    sns.scatterplot(data<span class="op">=</span>train, x<span class="op">=</span>feature,y<span class="op">=</span> <span class="st">'SalePrice'</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="main_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="108">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dividindo features e labels</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>train_labels <span class="op">=</span> train[<span class="st">'SalePrice'</span>].reset_index(drop<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>train_features <span class="op">=</span> train.drop([<span class="st">'SalePrice'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>test_features <span class="op">=</span> test</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Features unidas</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>combine <span class="op">=</span> pd.concat([train_features, test_features]).reset_index(drop<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>combine.shape</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="108">
+<pre><code>(2916, 80)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="109">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transformando variaveis que deveriam ser discretas</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>combine[<span class="st">'MSSubClass'</span>] <span class="op">=</span> combine[<span class="st">'MSSubClass'</span>].<span class="bu">apply</span>(<span class="bu">str</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>combine[<span class="st">'YrSold'</span>] <span class="op">=</span> combine[<span class="st">'YrSold'</span>].astype(<span class="bu">str</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>combine[<span class="st">'MoSold'</span>] <span class="op">=</span> combine[<span class="st">'MoSold'</span>].astype(<span class="bu">str</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="110">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Removendo valores nulos</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>missing_values(combine)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="110">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Total</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">PoolQC</td>
+<td>2907</td>
+<td>99.69</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">MiscFeature</td>
+<td>2811</td>
+<td>96.40</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Alley</td>
+<td>2718</td>
+<td>93.21</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Fence</td>
+<td>2345</td>
+<td>80.42</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">FireplaceQu</td>
+<td>1420</td>
+<td>48.70</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">LotFrontage</td>
+<td>486</td>
+<td>16.67</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageFinish</td>
+<td>159</td>
+<td>5.45</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">GarageQual</td>
+<td>159</td>
+<td>5.45</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageCond</td>
+<td>159</td>
+<td>5.45</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">GarageYrBlt</td>
+<td>159</td>
+<td>5.45</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageType</td>
+<td>157</td>
+<td>5.38</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtExposure</td>
+<td>82</td>
+<td>2.81</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtCond</td>
+<td>82</td>
+<td>2.81</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtQual</td>
+<td>81</td>
+<td>2.78</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtFinType2</td>
+<td>80</td>
+<td>2.74</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtFinType1</td>
+<td>79</td>
+<td>2.71</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">MasVnrType</td>
+<td>24</td>
+<td>0.82</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">MasVnrArea</td>
+<td>23</td>
+<td>0.79</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">MSZoning</td>
+<td>4</td>
+<td>0.14</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtFullBath</td>
+<td>2</td>
+<td>0.07</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtHalfBath</td>
+<td>2</td>
+<td>0.07</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Functional</td>
+<td>2</td>
+<td>0.07</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Utilities</td>
+<td>2</td>
+<td>0.07</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">GarageArea</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">GarageCars</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Electrical</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">KitchenQual</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">TotalBsmtSF</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtUnfSF</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">BsmtFinSF2</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">BsmtFinSF1</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Exterior2nd</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Exterior1st</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">SaleType</td>
+<td>1</td>
+<td>0.03</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>No arquivo de descrição das variáveis temos informações que valores faltantes <code>NA</code> na verdade representam que a casa não possui tal caracteristica.</p>
+<div class="cell" data-execution_count="111">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> missing_fix(features):</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Determina o valor de acordo com o data_description</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'Functional'</span>] <span class="op">=</span> features[<span class="st">'Functional'</span>].fillna(<span class="st">'Typ'</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Determina de acordo com a moda</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'Electrical'</span>] <span class="op">=</span> features[<span class="st">'Electrical'</span>].fillna(features[<span class="st">'Electrical'</span>].mode()[<span class="dv">0</span>])</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'KitchenQual'</span>] <span class="op">=</span> features[<span class="st">'KitchenQual'</span>].fillna(features[<span class="st">'KitchenQual'</span>].mode()[<span class="dv">0</span>])</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'Exterior1st'</span>] <span class="op">=</span> features[<span class="st">'Exterior1st'</span>].fillna(features[<span class="st">'Exterior1st'</span>].mode()[<span class="dv">0</span>])</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'Exterior2nd'</span>] <span class="op">=</span> features[<span class="st">'Exterior2nd'</span>].fillna(features[<span class="st">'Exterior2nd'</span>].mode()[<span class="dv">0</span>])</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'SaleType'</span>] <span class="op">=</span> features[<span class="st">'SaleType'</span>].fillna(features[<span class="st">'SaleType'</span>].mode()[<span class="dv">0</span>])</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Determina de acordo com features semelhantes</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'MSZoning'</span>] <span class="op">=</span> features.groupby(<span class="st">'MSSubClass'</span>)[<span class="st">'MSZoning'</span>].transform(<span class="kw">lambda</span> x: x.fillna(x.mode()[<span class="dv">0</span>]))</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'LotFrontage'</span>] <span class="op">=</span> features.groupby(<span class="st">'Neighborhood'</span>)[<span class="st">'LotFrontage'</span>].transform(<span class="kw">lambda</span> x: x.fillna(x.median()))</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    features[<span class="st">'Utilities'</span>] <span class="op">=</span> features.groupby(<span class="st">'MSSubClass'</span>)[<span class="st">'Utilities'</span>].transform(<span class="kw">lambda</span> x: x.fillna(x.mode()[<span class="dv">0</span>]))</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># None para categoricas</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    objects <span class="op">=</span> []</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> features.columns:</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> features[i].dtype <span class="op">==</span> <span class="bu">object</span>:</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>            objects.append(i)</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    features.update(features[objects].fillna(<span class="st">'None'</span>))</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 0 para numericas</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    numeric_dtypes <span class="op">=</span> [<span class="st">'int16'</span>, <span class="st">'int32'</span>, <span class="st">'int64'</span>, <span class="st">'float16'</span>, <span class="st">'float32'</span>, <span class="st">'float64'</span>]</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>    numeric <span class="op">=</span> []</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> features.columns:</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> features[i].dtype <span class="kw">in</span> numeric_dtypes:</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>            numeric.append(i)</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>    features.update(features[numeric].fillna(<span class="dv">0</span>))    </span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> features</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>combine <span class="op">=</span> missing_fix(combine)</span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>missing_values(combine)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="111">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Total</th>
+<th data-quarto-table-cell-role="th">%</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="feature-engineering" class="level2" data-number="3.2">
+<h2 data-number="3.2" data-anchor-id="feature-engineering"><span class="header-section-number">3.2</span> Feature Engineering</h2>
+<div class="cell" data-execution_count="112">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando a variável area total</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>combine[<span class="st">'TotalSF'</span>] <span class="op">=</span> combine[<span class="st">'TotalBsmtSF'</span>] <span class="op">+</span> combine[<span class="st">'1stFlrSF'</span>] <span class="op">+</span> combine[<span class="st">'2ndFlrSF'</span>]</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="113">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>numeric_features <span class="op">=</span> combine.select_dtypes(include<span class="op">=</span><span class="st">'number'</span>).columns.tolist()</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>categoric_features <span class="op">=</span> combine.select_dtypes(include<span class="op">=</span> <span class="st">'object'</span>).columns.tolist()</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Categoricas</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">## Ordinais</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>ord_features <span class="op">=</span> [<span class="st">'LotShape'</span>, <span class="st">'LandContour'</span>, <span class="st">'Utilities'</span>, <span class="st">'LandSlope'</span>, <span class="st">'ExterQual'</span>, <span class="st">'ExterCond'</span>, <span class="st">'BsmtQual'</span>, <span class="st">'BsmtCond'</span>, </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">'BsmtExposure'</span>, <span class="st">'BsmtFinType1'</span>, <span class="st">'BsmtFinType2'</span>, <span class="st">'HeatingQC'</span>, <span class="st">'KitchenQual'</span>, <span class="st">'Functional'</span>, <span class="st">'FireplaceQu'</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>                <span class="st">'GarageFinish'</span>, <span class="st">'GarageQual'</span>, <span class="st">'GarageCond'</span>, <span class="st">'PavedDrive'</span>, <span class="st">'PoolQC'</span>, <span class="st">'Fence'</span>]</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co">## Nominais</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>nom_features <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(categoric_features) <span class="op">-</span> <span class="bu">set</span>(ord_features))</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Numericas</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co">## Discretas</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>disc_features <span class="op">=</span> [<span class="st">'OverallQual'</span>, <span class="st">'OverallCond'</span>, <span class="st">'BsmtFullBath'</span>, <span class="st">'BsmtHalfBath'</span>, <span class="st">'FullBath'</span>, <span class="st">'HalfBath'</span>, <span class="st">'BedroomAbvGr'</span>, </span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">'KitchenAbvGr'</span>, <span class="st">'TotRmsAbvGrd'</span>, <span class="st">'Fireplaces'</span>, <span class="st">'GarageCars'</span>]</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co">## Continuas</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>cont_features <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(numeric_features) <span class="op">-</span> <span class="bu">set</span>(disc_features))</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Aplicando Encoding as variáveis</p>
+<div class="cell" data-execution_count="114">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>full_pipeline <span class="op">=</span> ColumnTransformer([</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'ord_enc'</span>, OrdinalEncoder(), ord_features),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'one_hot'</span>, OneHotEncoder(), nom_features),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">'strd'</span>, StandardScaler(), cont_features),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    ], remainder<span class="op">=</span> <span class="st">'passthrough'</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>combine_tr <span class="op">=</span> full_pipeline.fit_transform(combine)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>train_features_tr <span class="op">=</span> combine_tr[:<span class="bu">len</span>(train_labels), :]</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>test_features_tr <span class="op">=</span> combine_tr[<span class="bu">len</span>(train_labels):, :]</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="lista-de-modelos" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Lista de modelos</h1>
+<p>Estou usando K-fold cross-validation com 12 folds para avaliar os modelos</p>
+<div class="cell" data-execution_count="115">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Função para a métrica</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cv_rmse(model, X<span class="op">=</span>train_features_tr):</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    rmse <span class="op">=</span> np.sqrt(<span class="op">-</span>cross_val_score(model, X, train_labels, scoring<span class="op">=</span><span class="st">"neg_mean_squared_error"</span>, cv<span class="op">=</span><span class="dv">12</span>))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (rmse)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> []</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="116">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelos</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>tree_reg <span class="op">=</span> DecisionTreeRegressor(random_state<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>forest_reg <span class="op">=</span> RandomForestRegressor(random_state<span class="op">=</span><span class="dv">12</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="117">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>tree_reg.fit(train_features_tr, train_labels)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>forest_reg.fit(train_features_tr, train_labels)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict Train</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>tree_pred <span class="op">=</span> tree_reg.predict(train_features_tr)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>forest_pred <span class="op">=</span> forest_reg.predict(train_features_tr)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="118">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scores</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> [tree_reg, forest_reg]</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> models:</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    scores.append(cv_rmse(i))</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> {<span class="st">'Tree'</span>: [scores[<span class="dv">0</span>].mean(),scores[<span class="dv">0</span>].std()],</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>          <span class="st">'Forest'</span>: [scores[<span class="dv">1</span>].mean(),scores[<span class="dv">1</span>].std()]}</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> pd.DataFrame(scores, index<span class="op">=</span> [<span class="st">'Média'</span>, <span class="st">'Desvio-Padrão'</span>])</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>scores</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="118">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Tree</th>
+<th data-quarto-table-cell-role="th">Forest</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">Média</td>
+<td>0.204477</td>
+<td>0.135879</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Desvio-Padrão</td>
+<td>0.022316</td>
+<td>0.015716</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="ajustando-hiperparâmetros" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Ajustando hiperparâmetros</h1>
+<div class="cell" data-execution_count="119">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> [{<span class="st">'n_estimators'</span>: [<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">20</span>], <span class="st">'max_features'</span>: [<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>]},</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>              {<span class="st">'bootstrap'</span>: [<span class="va">False</span>], <span class="st">'n_estimators'</span>: [<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">20</span>], <span class="st">'max_features'</span>: [<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>]}]</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>grid_search <span class="op">=</span> GridSearchCV(forest_reg, param_grid, cv<span class="op">=</span><span class="dv">12</span>, </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>                           scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>, return_train_score<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>grid_search.fit(train_features_tr, train_labels)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>grid_search.best_params_</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="119">
+<pre><code>{'bootstrap': False, 'max_features': 8, 'n_estimators': 20}</code></pre>
+</div>
+</div>
+<p>Como os melhores valores foram os maiores valores dados, vamos refazer com maiores valores</p>
+<div class="cell" data-execution_count="120">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> [{<span class="st">'bootstrap'</span>: [<span class="va">False</span>], <span class="st">'n_estimators'</span>: [<span class="dv">260</span>, <span class="dv">280</span>, <span class="dv">300</span>], <span class="st">'max_features'</span>: [<span class="dv">60</span>, <span class="dv">64</span>, <span class="dv">68</span>]}]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>grid_search <span class="op">=</span> GridSearchCV(forest_reg, param_grid, cv<span class="op">=</span><span class="dv">12</span>, </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>                           scoring<span class="op">=</span><span class="st">'neg_mean_squared_error'</span>, return_train_score<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>grid_search.fit(train_features_tr, train_labels)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>grid_search.best_params_</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="120">
+<pre><code>{'bootstrap': False, 'max_features': 68, 'n_estimators': 300}</code></pre>
+</div>
+</div>
+</section>
+<section id="avaliando-no-test-set" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Avaliando no test-set</h1>
+<div class="cell" data-execution_count="121">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>final_model <span class="op">=</span> grid_search.best_estimator_</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>final_predictions <span class="op">=</span> final_model.predict(test_features_tr)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="122">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>ids <span class="op">=</span> pd.read_csv(<span class="st">'data/sample_submission.csv'</span>).drop([<span class="st">'SalePrice'</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>predictions <span class="op">=</span> pd.DataFrame(np.exp(final_predictions))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>submissions <span class="op">=</span> pd.concat([ids, predictions], axis<span class="op">=</span> <span class="dv">1</span>).reset_index(drop<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>submissions.rename(columns<span class="op">=</span>{<span class="dv">0</span>: <span class="st">"SalePrice"</span>}, inplace<span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>submissions.to_csv(<span class="st">'data/submission.csv'</span>, index<span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="main_files/figure-html/49c237d3-1-score.jpg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">score.jpg</figcaption>
+</figure>
+</div>
+<p>Na competição do Kaggle, obtive um score de 0.13956 no RMSE (Root Mean Square Error).</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copiada");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copiada");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
