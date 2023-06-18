@@ -1,4 +1,5 @@
 [Ver Projeto](https://salvnetto.github.io/house-pricing/main.html)
+
 [Ver descrição das variáveis](https://salvnetto.github.io/house-pricing/data/data_description.txt)
 
 Este projeto é parte de uma mentoria oferecida pelo setor de projetos da empresa júnior de estatística da UFMG 'EstatMG'. Nesse programa, ex-membros veteranos nos auxiliam na construção de projetos de machine learning, simulando situações reais do mercado de trabalho. O objetivo deste projeto é prever os valores das vendas de casas utilizando técnicas de machine learning.
